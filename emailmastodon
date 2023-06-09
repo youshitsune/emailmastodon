@@ -2,8 +2,9 @@
 # Bot that mirrors emails to Mastodon account
 import argparse
 import configparser
+import email
 import imaplib
-from mastodon import Mastodon
+import mastodon
 
 CONFIG_PATH = "./config.ini"
 
@@ -16,7 +17,7 @@ def show_version():
     print("There is NO WARRANTY, to the extent permitted by law.")
 
 def publish(ctx, token, url):
-    m = Mastodon(access_token=token, api_base_url=url)
+    m = mastodon.Mastodon(access_token=token, api_base_url=url)
     m.toot(ctx)
 
 def listen(user, passwd, url, port):
@@ -32,7 +33,7 @@ def listen(user, passwd, url, port):
                 _, msg = mail.fetch(str(i), "(RFC822)")
                 for resp in msg:
                     if isinstance(resp, tuple):
-                        msg = email.messages_from_bytes(response[1])
+                        msg = email.message_from_bytes(resp[1])
                         body = msg.get_payload(decode=True).decode()
                         ctx.append(body)
             publish("".join(ctx), TOKEN, URL)
@@ -58,3 +59,5 @@ if __name__ == '__main__':
     PORT_MAIL = config.get('credentials', 'PORT_MAIL')
     TOKEN = config.get('credentials', 'TOKEN')
     URL = config.get('credentials', 'URL')
+
+    listen(USER_MAIL, PASS_MAIL, URL_MAIL, PORT_MAIL)
