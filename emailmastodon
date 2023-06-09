@@ -21,35 +21,24 @@ def publish(ctx, token, url):
 def listen(user, passwd, url, port):
     mail = imaplib.IMAP4_SSL(url, port=port)
     mail.login(user, passwd)
-    mail.select("INBOX")
-    status, messages = mail.select()
-    past_messages = messages
+    _, messages = mail.select()
+    past_messages = int(messages[0].decode())
     while True:
         ctx = []
-        status, messages = mail.select()
-        if past_messages != messages:
-            for i in range(past_messages+1, messages+1):
-                res, msg = mail.fetch(str(i), "(RFC822)")
+        _, messages = mail.select()
+        if past_messages != int(messages[0].decode()):
+            for i in range(past_messages+1, int(messages[0].decode())+1):
+                _, msg = mail.fetch(str(i), "(RFC822)")
                 for resp in msg:
                     if isinstance(resp, tuple):
                         msg = email.messages_from_bytes(response[1])
-                        for part in msg.walk():
-                            try:
-                                body = part.get_payload(decode=True).decode()
-                            except Exception:
-                                pass
-                            else:
-                                ctx.append(body)
-
-                        publish("".join(ctx), TOKEN, URL)
-                        past_messages = messages
-
-                                
+                        body = msg.get_payload(decode=True).decode()
+                        ctx.append(body)
+            publish("".join(ctx), TOKEN, URL)
+            past_messages = int(messages[0].decode())
 
         else:
             continue
-
-
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description="Bot that mirrors emails to Mastodon account")
