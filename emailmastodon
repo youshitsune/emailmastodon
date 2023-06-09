@@ -16,7 +16,8 @@ def show_version():
     print("There is NO WARRANTY, to the extent permitted by law.")
 
 def publish(ctx, token, url):
-    pass
+    m = Mastodon(access_token=token, api_base_url=url)
+    m.toot(ctx)
 
 def listen(user, passwd, url, port):
     mail = imaplib.IMAP4_SSL(url, port=port)
